@@ -93,7 +93,7 @@ public class WeixinCrawlerManagerImpl implements WeixinCrawlerManager{
 									}
 								};
 								exec.execute(task);
-								post.setPicUrl(appConfig.getDomain() + "/pictures/" + picName);
+								post.setPicUrl(appConfig.getDomain() + "/" + picName);
 							}
 						} catch (Exception e) {
 							LOG.error(e.getMessage(), e);
