@@ -38,19 +38,21 @@ import org.tassemble.weixin.gongzhong.dto.GongArticle;
 public class GongzhongSession {
 	private static final String WECHAT_LOGIN_URL = "http://mp.weixin.qq.com/cgi-bin/login?lang=zh_CN";
 	private static final String FILE_UPLOAD_TICKET = "https://mp.weixin.qq.com/cgi-bin/appmsg?t=media/appmsg_edit&action=edit&type=10&isMul=1&isNew=1&lang=zh_CN&token=";
-	private static final String FILE_UPLOAD_URL = "https://mp.weixin.qq.com/cgi-bin/filetransfer?action=upload_material&f=json&ticket_id=gh_d906c495191c&lang=zh_CN&ticket=";
+	private static final String FILE_UPLOAD_URL = "https://mp.weixin.qq.com/cgi-bin/filetransfer?action=upload_material&f=json&ticket_id=%s&lang=zh_CN&ticket=%s";
 	private final static Logger LOG = LoggerFactory.getLogger(GongzhongSession.class); 
 	
 	private final String DEFAULT_PIC_URL = "http://img.hb.aicdn.com/4e61532fafc768f467ec9d441611b04badead05e7fc15-5NAFvF_fw658";	
 	public static final String INVALID_FILE_ID = "-1";
 	
 	public static final String INVALID_ARTICLE_ID = "-1";
+	public static final String INVALID_RESULT = "-1";
 	private HttpClient			client;
 	private boolean				login;
 
 	private String				username;
 	private String				password;
 	private String 				uploadTicket;
+	private String 				uploadUsername;
 	
 	private String 				token;
 	
@@ -82,18 +84,28 @@ public class GongzhongSession {
 			}
 		});
 		if (StringUtils.isNotBlank(contentWithUploadTikekct)) {
-			int ticketIndex = contentWithUploadTikekct.indexOf("ticket:\"");
-			if (ticketIndex >= 0) {
-				String endPostfix = "\",";
-				int ticketIndexEnd = contentWithUploadTikekct.indexOf(endPostfix, ticketIndex + "ticket:\"".length());
-				if (ticketIndexEnd > 0) {
-					this.uploadTicket = contentWithUploadTikekct.substring(ticketIndex + "ticket:\"".length(), ticketIndexEnd);
-					return true;
-				}
+			this.uploadTicket = getSequenceByKey(contentWithUploadTikekct, "ticket:\"");
+			this.uploadUsername = getSequenceByKey(contentWithUploadTikekct, "user_name:\"");
+			if (this.uploadTicket.equals(INVALID_RESULT) || this.uploadUsername.equals(INVALID_RESULT)) {
+				throw new RuntimeException("获取上传ticket失败");
 			}
+			return true;
 		}
 		LOG.error("ticket get failed:" + contentWithUploadTikekct);
 		return false;
+	}
+
+
+	private String getSequenceByKey(String contentWithUploadTikekct, String keyword) {
+		int ticketIndex = contentWithUploadTikekct.indexOf(keyword);
+		if (ticketIndex >= 0) {
+			String endPostfix = "\",";
+			int ticketIndexEnd = contentWithUploadTikekct.indexOf(endPostfix, ticketIndex + keyword.length());
+			if (ticketIndexEnd > 0) {
+				return contentWithUploadTikekct.substring(ticketIndex + keyword.length(), ticketIndexEnd);
+			}
+		}
+		return INVALID_RESULT;
 	}
 	
 	public String uploadFile(final String picUrl) {
@@ -109,13 +121,14 @@ public class GongzhongSession {
 		
 		final String token = this.token;
 		final String ticket = this.uploadTicket;
+		final String uploadUsername = this.uploadUsername;
 		String result;
 		try {
 			result = HttpClientUtils.getHtmlByPostMethod(client, new HttpDataProvider() {
 				
 				@Override
 				public String getUrl() {
-					return FILE_UPLOAD_URL + ticket + "&token=" + token;
+					return String.format(FILE_UPLOAD_URL, uploadUsername,  ticket);
 				}
 				
 				@Override
@@ -338,6 +351,16 @@ public class GongzhongSession {
 
 	public void setUploadTicket(String uploadTicket) {
 		this.uploadTicket = uploadTicket;
+	}
+
+
+	public String getUploadUsername() {
+		return uploadUsername;
+	}
+
+
+	public void setUploadUsername(String uploadUsername) {
+		this.uploadUsername = uploadUsername;
 	}
 
 }
