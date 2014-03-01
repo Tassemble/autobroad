@@ -19,9 +19,17 @@
 	</bean>
 
 
+
+	<bean id="appConfig" class="org.tassemble.weixin.config.AppConfig"> 
+		<property name="domain">
+			<value>${domain}</value>
+		</property>
+	</bean>
 	<context:component-scan base-package="org.tassemble"></context:component-scan>
 
 	<context:annotation-config />
+	
+	
 
 
 

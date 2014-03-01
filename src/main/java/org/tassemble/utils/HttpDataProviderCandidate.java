@@ -41,7 +41,6 @@ public class HttpDataProviderCandidate {
 
 			@Override
 			public HttpEntity getHttpEntity() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 

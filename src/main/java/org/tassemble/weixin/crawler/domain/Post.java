@@ -8,13 +8,32 @@ public class Post {
 private static final long serialVersionUID = 1L;
 
 
-	public static final String POST_TYPE = "funny";
+	public static final String POST_TYPE_SMALL_FUNNY = "small_funny";
+	public static final String POST_TYPE_LARGE_FUNNY = "large_funny";
 	private Long id;
 	private String content;
 	private String postType;
 	private Long gmtCreate;
 	private Long gmtModified;
+	private String title;
+	private String picUrl;
+	private Long linkId;
 	
+	
+	
+	
+	
+	
+
+	@DataProperty(column="title")
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
 	public void setId(Long id) {
 		this.id = id;
 	}
@@ -62,6 +81,26 @@ private static final long serialVersionUID = 1L;
 	@DataProperty(column = "gmt_modified")	
 	public Long getGmtModified() {
 		return gmtModified;
+	}
+
+	
+	@DataProperty(column="pic_url")
+	public String getPicUrl() {
+		return picUrl;
+	}
+
+	public void setPicUrl(String picUrl) {
+		this.picUrl = picUrl;
+	}
+
+	
+	@DataProperty(column="link_id")
+	public Long getLinkId() {
+		return linkId;
+	}
+
+	public void setLinkId(Long linkId) {
+		this.linkId = linkId;
 	}	
 
 

@@ -21,9 +21,6 @@ public class EduDdbTestExecutionListener extends AbstractTestExecutionListener {
 
     @Override
     public void beforeTestClass(TestContext testContext) throws Exception {
-        // TODO Auto-generated method stub
-
-
         if (dbTransactionManager == null) {
             dbTransactionManager = (IDBTransactionManager) testContext.getApplicationContext().getBean("mysqlTransactionManagerAdapter");
         }
@@ -32,8 +29,6 @@ public class EduDdbTestExecutionListener extends AbstractTestExecutionListener {
 
     @Override
     public void prepareTestInstance(TestContext testContext) throws Exception {
-        // TODO Auto-generated method stub
-
         super.prepareTestInstance(testContext);
     }
 

@@ -7,10 +7,13 @@ import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
@@ -30,18 +33,25 @@ public class SqlManagerImpl extends SqlManagerBase implements SqlManager {
 	private IDBTransactionManager	transactionManager;
 	private RuntimeStatCounter		runtimeStatCounter;
 	public static final long		TIME_LIMIT	= 2000L;
+	Map<String, AtomicLong> idGenerator = new HashMap<String, AtomicLong>();
 
 	public long allocateRecordId(String tableName) {
 		Connection con = getConnection();
 		DBResource dbr = new DBResource(con, null, null);
 		try {
-			Statement stmt =con.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT Auto_increment FROM information_schema.tables WHERE table_name = '" + tableName + "'");
-			rs.next();
-			long id = rs.getLong(1);
-			rs.close();
-			stmt.close();
-			return id;
+			if (idGenerator.containsKey(tableName)) {
+				return idGenerator.get(tableName).getAndIncrement();
+			} else {
+				Statement stmt =con.createStatement();
+				ResultSet rs = stmt.executeQuery("SELECT Auto_increment FROM information_schema.tables WHERE table_name = '" + tableName + "'");
+				rs.next();
+				long id = rs.getLong(1);
+				AtomicLong atomicLong = new AtomicLong(id);
+				idGenerator.put(tableName, atomicLong);
+				rs.close();
+				stmt.close();
+				return idGenerator.get(tableName).getAndIncrement();
+			}
 		} catch (Throwable e) {
 			logger.error("genID " + tableName, e);
 			throw new RuntimeException(e);

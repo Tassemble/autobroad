@@ -39,9 +39,10 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  * @since 2013.1.15
  */
-@Component("httpClientUtils")
+@Component
 public class HttpClientUtils implements InitializingBean, DisposableBean {
 
+	
 	private static final Logger				log					= LoggerFactory.getLogger(HttpClientUtils.class);
 	private static final int				CONNECTION_TIMEOUT	= 3000;											// 连接超时时间
 	private static final int				SO_TIMEOUT			= 5000;											// 等待数据超时时间
@@ -173,35 +174,23 @@ public class HttpClientUtils implements InitializingBean, DisposableBean {
 		}
 		HttpResponse response = client.execute(post);
 
+//		Header[] headers = response.getHeaders("Set-Cookie");
+//		if (!ArrayUtils.isEmpty(headers)) {
+//			CookieStore cookieStore = new BasicCookieStore();
+//			for (Header cookieHeader : headers) {
+//				cookieStore.addCookie(new BasicClientCookie(cookieHeader.getName(), cookieHeader.getValue()));
+//			}
+//			DefaultHttpClient httpClient = (DefaultHttpClient) client;
+//			httpClient.setCookieStore(cookieStore);
+//		}
+		
+		
 		if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
 			if (log.isDebugEnabled()) {
 				log.debug(EntityUtils.toString(response.getEntity()));
 			}
 			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_MOVED_TEMPORARILY) {
-				Header[] headers = response.getHeaders("Set-Cookie");
-				if (!ArrayUtils.isEmpty(headers)) {
-					CookieStore cookieStore = new BasicCookieStore();
-					for (Header cookieHeader : headers) {
-						String value = cookieHeader.getValue().split(";")[0];
-						if (!StringUtils.isEmpty(value)) {
-							String[] keyValue = value.split("=");
-							if (keyValue.length == 2)
-							{
-								BasicClientCookie cookie = new BasicClientCookie(keyValue[0], keyValue[1]);
-								cookie.setVersion(1);
-								cookie.setDomain(".520wenxiong.com");
-								cookie.setPath("/");
-								cookie.setSecure(true);
-								// Set attributes EXACTLY as sent by the server 
-								cookie.setAttribute(ClientCookie.VERSION_ATTR, "1");
-								cookie.setAttribute(ClientCookie.DOMAIN_ATTR, ".520wenxiong.com");
-								cookieStore.addCookie(cookie);
-							}
-						}
-					}
-					DefaultHttpClient httpClient = (DefaultHttpClient) client;
-					httpClient.setCookieStore(cookieStore);
-				}
+				
 				// log.info(response.getFirstHeader("Set-Cookie").getValue());
 				String url = response.getFirstHeader("Location").getValue();
 				log.warn("302 redirect:" + url);
@@ -262,6 +251,8 @@ public class HttpClientUtils implements InitializingBean, DisposableBean {
 	public void setCommonHttpManager(PoolingClientConnectionManager commonHttpManager) {
 		this.commonHttpManager = commonHttpManager;
 	}
+	
+	
 
 
 }
