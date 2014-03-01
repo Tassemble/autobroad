@@ -66,7 +66,7 @@ public class LinkMarkServiceTest extends BaseTestCase{
 	
 	@Test
 	public void testCreateArticles() {
-		GongzhongSession session = GongZhongManager.createSesson("luanlexi@163.com", DigestUtils.md5Hex("chen1234"));
+		GongzhongSession session = GongZhongManager.createSesson("chen-hongqin@163.com", "b1efe3fe1c322c3107dc7c605beafa02");
 		String result = GongZhongManager.createArticle(session, GongZhongManager.fetchSomeArticlesByTimes(Post.POST_TYPE_SMALL_FUNNY, 1));
 		GsonUtils.printJson(result);
 	}
