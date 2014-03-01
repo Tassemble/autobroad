@@ -2,11 +2,14 @@ package org.tassemble.weixin.manager;
 
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
@@ -29,6 +32,8 @@ import org.springframework.util.CollectionUtils;
 import org.tassemble.utils.HttpClientUtils;
 import org.tassemble.utils.HttpDataProvider;
 import org.tassemble.weixin.gongzhong.dto.GongArticle;
+
+import com.netease.framework.dao.sql.annotation.DataProperty;
 
 /**
  * @author CHQ
@@ -312,8 +317,100 @@ public class GongzhongSession {
 	}
 	
 	
-	public boolean doPostArticle(String id) {
-		//TODO doPostArticle
+	public String getTopArticleId() {
+		String result = HttpClientUtils.getHtmlByGetMethod(client, new HttpDataProvider() {
+			@Override
+			public String getUrl() {
+				return String.format("https://mp.weixin.qq.com/cgi-bin/appmsg?token=%s&lang=zh_CN&random=0.5771591463126242&f=json&ajax=1&type=10&action=list&begin=0&count=10", token);
+			}
+
+			@Override
+			public HttpEntity getHttpEntity() {
+				return null;
+			}
+
+			@Override
+			public List<Header> getHeaders() {
+				List<Header> headerList = new ArrayList<Header>();
+				headerList.add(new BasicHeader("Referer", String.format("https://mp.weixin.qq.com/cgi-bin/masssendpage?t=mass/send&token=%s&lang=zh_CN", token)));
+				headerList.add(new BasicHeader("Content-Type", "text/html; charset=utf-8"));
+				return headerList;
+			}
+			
+		});
+		
+		
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			HashMap<String, Object> hash = mapper.readValue(result, HashMap.class);
+			if (hash.get("base_resp") != null) {
+				HashMap<String, Object> innerMap = (HashMap)hash.get("base_resp");
+				Integer successCode = 0;
+				if(successCode.equals(innerMap.get("ret"))) {
+					if (hash.get("app_msg_info") != null) {
+						HashMap<String, Object>  msgMap = (HashMap)hash.get("app_msg_info");
+						String firstJson = JSONObject.fromObject(hash.get("app_msg_info")).getJSONArray("item").get(0).toString();
+						return JSONObject.fromObject(firstJson).getString("app_id");
+					}
+				}
+			}
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
+		return INVALID_FILE_ID;
+	}
+	
+	public boolean doPostArticle() {
+		final String id = getTopArticleId();
+		final String token = this.token;
+		//
+		//Referer:
+		try {
+			String result = HttpClientUtils.getHtmlByPostMethod(client, new HttpDataProvider() {
+
+				@Override
+				public String getUrl() {
+					return "https://mp.weixin.qq.com/cgi-bin/masssend";
+				}
+
+				@Override
+				public HttpEntity getHttpEntity() {
+					try {
+						ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
+						params.add(new BasicNameValuePair("type", "10"));
+						params.add(new BasicNameValuePair("appmsgid", id));
+						params.add(new BasicNameValuePair("sex", "0"));
+						params.add(new BasicNameValuePair("groupid", "-1"));
+						params.add(new BasicNameValuePair("synctxweibo", "0"));
+						params.add(new BasicNameValuePair("synctxnews", "0"));
+						params.add(new BasicNameValuePair("country", ""));
+						params.add(new BasicNameValuePair("province", ""));
+						params.add(new BasicNameValuePair("city", ""));
+						params.add(new BasicNameValuePair("imgcode", ""));
+						params.add(new BasicNameValuePair("token", token));
+						params.add(new BasicNameValuePair("lang", "zh_CN"));
+						params.add(new BasicNameValuePair("random", "0.5487554285209626"));
+						params.add(new BasicNameValuePair("f", "json"));
+						params.add(new BasicNameValuePair("ajax", "1"));
+						params.add(new BasicNameValuePair("t", "ajax-response"));
+						return new UrlEncodedFormEntity(params, "UTF-8");
+					} catch (UnsupportedEncodingException e) {
+					}
+					return null;
+				}
+
+				@Override
+				public List<Header> getHeaders() {
+					List<Header> headerList = new ArrayList<Header>();
+					headerList.add(new BasicHeader("Referer", String.format("https://mp.weixin.qq.com/cgi-bin/masssendpage?t=mass/send&token=%s&lang=zh_CN", token)));
+					headerList.add(new BasicHeader("Content-Type", "text/html; charset=utf-8"));
+					return headerList;
+				}
+			});
+			return true;
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
 		
 		
 		return false;

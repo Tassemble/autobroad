@@ -36,7 +36,7 @@ public class LinkMarkServiceTest extends BaseTestCase{
 	
 	@Test
 	public void uploadFile() throws Exception {
-		GongzhongSession session = new GongzhongSession(httpClientUtils.getCommonHttpManager(), "luanlexi@163.com", DigestUtils.md5Hex("chen1234"));
+		GongzhongSession session = new GongzhongSession(httpClientUtils.getCommonHttpManager(), "luanlexi@163.com", "b1efe3fe1c322c3107dc7c605beafa02");
 		
 		if (session.login()) {
 			GsonUtils.printJson(session.uploadFile("http://e.hiphotos.baidu.com/image/w%3D2048/sign=d5c6221ddf54564ee565e33987e69d82/738b4710b912c8fc5f5ce8c3fe039245d6882114.jpg"));
@@ -66,9 +66,29 @@ public class LinkMarkServiceTest extends BaseTestCase{
 	
 	@Test
 	public void testCreateArticles() {
-		GongzhongSession session = GongZhongManager.createSesson("chen-hongqin@163.com", "b1efe3fe1c322c3107dc7c605beafa02");
+		GongzhongSession session = GongZhongManager.createSesson("luanlexi@163.com", "b1efe3fe1c322c3107dc7c605beafa02");
 		String result = GongZhongManager.createArticle(session, GongZhongManager.fetchSomeArticlesByTimes(Post.POST_TYPE_SMALL_FUNNY, 1));
 		GsonUtils.printJson(result);
+	}
+	
+	@Test
+	public void getSendArticle() {
+		GongzhongSession session = new GongzhongSession(httpClientUtils.getCommonHttpManager(), "luanlexi@163.com", "b1efe3fe1c322c3107dc7c605beafa02");
+		session.login();
+//		System.out.println(session.getTopArticleId());
+		session.doPostArticle();
+	}
+	
+	
+	@Test
+	public void createArticleAndSend() {
+		GongzhongSession session = GongZhongManager.createSesson("luanlexi@163.com", "b1efe3fe1c322c3107dc7c605beafa02");
+		if (session.isLogin()) {
+			String result = GongZhongManager.createArticle(session, GongZhongManager.fetchSomeArticlesByTimes(Post.POST_TYPE_SMALL_FUNNY, 1));
+			if (!GongzhongSession.INVALID_ARTICLE_ID.equals(result)) {
+				session.doPostArticle();
+			}
+		}
 	}
 	
 }
