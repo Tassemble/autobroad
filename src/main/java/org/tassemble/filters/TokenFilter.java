@@ -42,7 +42,7 @@ public class TokenFilter implements Filter {
     	HttpServletResponse response = (HttpServletResponse)arg1;
     	
     	LOG.info("request url:" + request.getRequestURL().toString());
-    	
+    	chain.doFilter(request, response);
     }
 
 	@Override

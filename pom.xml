@@ -21,6 +21,14 @@
 	<dependencies>
 
 
+		<!--freemarker--> 
+		<dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+			<version>2.3.15</version>
+		</dependency>
+
+
 		<dependency>
 			<groupId>com.belerweb</groupId>
 			<artifactId>weibo4j-oauth2</artifactId>

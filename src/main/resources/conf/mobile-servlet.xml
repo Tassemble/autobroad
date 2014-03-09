@@ -1,0 +1,120 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+                http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+                http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+                http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+
+
+
+	<bean id="springMVCPropertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:biz.properties</value>
+			</list>
+		</property>
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+	</bean>
+
+	<aop:aspectj-autoproxy />
+
+	<context:annotation-config />
+
+	<context:component-scan base-package="org.tassemble" use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+
+	<mvc:annotation-driven />
+
+
+	<!-- View resolvers can also be configured with ResourceBundles or XML files. 
+		If you need different view resolving based on Locale, you have to use the 
+		resource bundle resolver. -->
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.freemarker.FreeMarkerView">
+		</property>
+		<property name="contentType">
+			<value>text/html; charset=UTF-8</value>
+		</property>
+		<property name="cache" value="true" />
+		<property name="prefix" value="" />
+		<property name="suffix" value=".ftl" />
+		<property name="exposeSpringMacroHelpers" value="true" />
+		<property name="exposeRequestAttributes" value="true" />
+		<property name="exposeSessionAttributes" value="true" />
+	</bean>
+	<bean id="freemarkerConfig"
+		class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+		<property name="templateLoaderPaths">
+			<list>
+				<value>${freemarker_html_root}</value>
+				<value>/template/</value>
+			</list>
+		</property>
+		<property name="defaultEncoding" value="utf-8" />
+		<property name="freemarkerSettings">
+			<props>
+				<prop key="locale">zh_CN</prop>
+				<prop key="template_update_delay">0</prop>
+				<prop key="number_format">0.##########</prop>
+				<prop key="auto_import">spring.ftl as spring</prop>
+			</props>
+		</property>
+		<property name="freemarkerVariables">
+			<map>
+				<entry key="xml_escape" value-ref="fmXmlEscape" />
+			</map>
+		</property>
+	</bean>
+
+	<bean id="fmXmlEscape" class="freemarker.template.utility.XmlEscape" />
+	<!-- 全局异常配置 start -->
+	<bean id="exceptionResolver"
+		class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="exceptionMappings">
+			<props>
+				<prop
+					key="org.springframework.security.authentication.AuthenticationCredentialsNotFoundException">mobile/errors/notAuth</prop>
+				<prop key="org.springframework.security.access.AccessDeniedException">mobile/errors/accessDenied</prop>
+				<prop
+					key="org.springframework.web.HttpRequestMethodNotSupportedException">mobile/errors/formGetError</prop>
+				<prop
+					key="com.netease.edu.commons.exception.EduException$MemberAddErrorException">mobile/errors/systemError</prop>
+				<prop
+					key="com.netease.edu.commons.exception.EduException$AskNotExistsException">mobile/errors/systemError</prop>
+				<prop
+					key="com.netease.edu.commons.exception.EduException$MobileAccessException">mobile/errors/notAuth</prop>
+				<prop key="com.netease.edu.usercenter.exception.UserCenterException">mobile/errors/systemError</prop>
+				<prop key="java.lang.Throwable">mobile/errors/systemError</prop>
+			</props>
+		</property>
+		<property name="statusCodes">
+			<props>
+				<prop key="mobile/errors/friendly404">200</prop>
+				<prop key="mobile/errors/NotFindUser">200</prop>
+				<prop key="mobile/errors/systemError">200</prop>
+				<prop key="mobile/errors/notAuth">200</prop>
+				<prop key="mobile/errors/accessDenied">200</prop>
+			</props>
+		</property>
+		<!-- 设置日志输出级别，不定义则默认不输出警告等错误日志信息 -->
+		<property name="warnLogCategory" value="WARN" />
+		<!-- 默认错误页面，当找不到上面mappings中指定的异常对应视图时，使用本默认配置 -->
+		<property name="defaultErrorView" value="common/errors/systemError" />
+		<!-- 默认HTTP状态码 -->
+		<property name="defaultStatusCode" value="500" />
+		<!-- 提高优先级，使用自定义的统一异常处理 -->
+		<property name="order" value="0" />
+
+	</bean>
+	<!-- 全局异常配置 end -->
+
+
+</beans>
