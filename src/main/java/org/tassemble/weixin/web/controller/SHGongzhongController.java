@@ -1,5 +1,6 @@
 package org.tassemble.weixin.web.controller;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -8,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,4 +54,24 @@ public class SHGongzhongController {
 				+ "validateDevelopSignature request, parameters" + fields.toString()
 				+ "echostr:" + echostr);
 	}
+	
+	@RequestMapping(method=RequestMethod.POST, value="/processVoice")
+	public void processVoice(HttpServletRequest request, HttpServletResponse response) {
+		try {
+			String body = IOUtils.toString(request.getInputStream(), "UTF-8");
+			
+			
+			
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+	}
+	
+	
+	
 }

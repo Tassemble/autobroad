@@ -2,12 +2,12 @@ package org.tassemble.weixin.manager;
 
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.json.JSONObject;
 
@@ -17,7 +17,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntity;
@@ -32,8 +31,6 @@ import org.springframework.util.CollectionUtils;
 import org.tassemble.utils.HttpClientUtils;
 import org.tassemble.utils.HttpDataProvider;
 import org.tassemble.weixin.gongzhong.dto.GongArticle;
-
-import com.netease.framework.dao.sql.annotation.DataProperty;
 
 /**
  * @author CHQ
@@ -221,18 +218,16 @@ public class GongzhongSession {
 			});
 			ObjectMapper mapper = new ObjectMapper();
 			HashMap<String, Object> hash = mapper.readValue(result, HashMap.class);
-			
-			if (hash.get("ErrCode").equals(0)) {
+			HashMap<String, Object> retInfo = (HashMap)hash.get("base_resp");
+			if (retInfo.get("ret").equals(0)) {
 				this.setLogin(true);
-				String msg = (String)hash.get("ErrMsg");
-				if (StringUtils.isNotBlank(msg)) {
-					String tokenPrefxi = "token=";
-					int idx = msg.indexOf(tokenPrefxi);
-					if (idx >= 0) {
-						this.setToken(msg.substring(idx + tokenPrefxi.length(), msg.length()));
-						getFileUploadTicket();
-						return true;
-					}
+				String uri = (String)hash.get("redirect_url");
+				String tokenPrefxi = "token=";
+				int idx = uri.indexOf(tokenPrefxi);
+				if (idx >= 0) {
+					this.setToken(uri.substring(idx + tokenPrefxi.length(), uri.length()));
+					getFileUploadTicket();
+					return true;
 				}
 			}
 		} catch (Exception e) {
