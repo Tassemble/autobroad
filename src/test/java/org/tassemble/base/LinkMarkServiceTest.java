@@ -91,4 +91,18 @@ public class LinkMarkServiceTest extends BaseTestCase{
 		}
 	}
 	
+	
+	@Test
+	public void createArticleAndSendByAccountChen() {
+		GongzhongSession session = GongZhongManager.createSesson("chen-hongqin@163.com", "b1efe3fe1c322c3107dc7c605beafa02");
+		if (session.isLogin()) {
+			String result = GongZhongManager.createArticle(session, GongZhongManager.fetchSomeArticlesByTimes(Post.POST_TYPE_SMALL_FUNNY, 1));
+			if (!GongzhongSession.INVALID_ARTICLE_ID.equals(result)) {
+				session.doPostArticle();
+			}
+		}
+	}
+	
+	
+	
 }
