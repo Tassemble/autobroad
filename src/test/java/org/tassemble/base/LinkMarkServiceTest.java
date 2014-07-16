@@ -54,7 +54,7 @@ public class LinkMarkServiceTest extends BaseTestCase{
 
 	@Test
 	public void testGetDataDetail() {
-		GsonUtils.printJson(linkMarkService.getQingNianPostItems("http://www.qingniantuzhai.com/6887.html"));
+		GsonUtils.printJson(linkMarkService.getQingNianPostItems("http://www.qntz.cc/7195.html"));
 	}
 	
 	

@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
+import org.tassemble.base.commons.utils.collection.CellLocker;
 
 import com.netease.dbsupport.IConnectionManager;
 import com.netease.dbsupport.transaction.IDBTransactionManager;
@@ -34,7 +35,7 @@ public class SqlManagerImpl extends SqlManagerBase implements SqlManager {
 	private RuntimeStatCounter		runtimeStatCounter;
 	public static final long		TIME_LIMIT	= 2000L;
 	Map<String, AtomicLong> idGenerator = new HashMap<String, AtomicLong>();
-
+	CellLocker<String> idLocker = new CellLocker<String>(256);
 	public long allocateRecordId(String tableName) {
 		Connection con = getConnection();
 		DBResource dbr = new DBResource(con, null, null);
@@ -42,15 +43,23 @@ public class SqlManagerImpl extends SqlManagerBase implements SqlManager {
 			if (idGenerator.containsKey(tableName)) {
 				return idGenerator.get(tableName).getAndIncrement();
 			} else {
-				Statement stmt =con.createStatement();
-				ResultSet rs = stmt.executeQuery("SELECT Auto_increment FROM information_schema.tables WHERE table_name = '" + tableName + "'");
-				rs.next();
-				long id = rs.getLong(1);
-				AtomicLong atomicLong = new AtomicLong(id);
-				idGenerator.put(tableName, atomicLong);
-				rs.close();
-				stmt.close();
-				return idGenerator.get(tableName).getAndIncrement();
+			    idLocker.lock("", tableName);
+			    try {
+    			    if (idGenerator.containsKey(tableName)) {
+    			        return idGenerator.get(tableName).getAndIncrement();
+    			    }
+    				Statement stmt =con.createStatement();
+    				ResultSet rs = stmt.executeQuery("SELECT Auto_increment FROM information_schema.tables WHERE table_name = '" + tableName + "'");
+    				rs.next();
+    				long id = rs.getLong(1);
+    				AtomicLong atomicLong = new AtomicLong(id);
+    				idGenerator.put(tableName, atomicLong);
+    				rs.close();
+    				stmt.close();
+    				return idGenerator.get(tableName).getAndIncrement();
+			    } finally {
+			        idLocker.unLock("", tableName);
+			    }
 			}
 		} catch (Throwable e) {
 			logger.error("genID " + tableName, e);
