@@ -11,7 +11,7 @@ import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.tassemble.base.commons.utils.reflection.ReflectionUtils;
 
 /*
- * @author hzfjd
+ * @author 
  * @date 2012-5-8
  */
 public class SubGroupUtils {

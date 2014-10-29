@@ -1,7 +1,7 @@
 package org.tassemble.base.commons.utils.collection;
 
 /*
- * @author hzfjd
+ * @author 
  * @date 2012-12-15
  */
 public class OrderLimit {
